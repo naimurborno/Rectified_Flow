@@ -281,19 +281,20 @@ class OpenMMDiTPipeline:
             self._t5_encoder.to(self.device)
 
         try:
-            if self.kind == "sd3":
-                result = self._encode_prompt_fn(
-                    prompt=prompt, prompt_2=prompt, prompt_3=prompt,
-                    negative_prompt=negative_prompt, negative_prompt_2=negative_prompt,
-                    negative_prompt_3=negative_prompt,
-                    do_classifier_free_guidance=do_classifier_free_guidance,
-                    device=self.device,
-                )
-            else:  # flux
-                prompt_embeds, pooled_prompt_embeds, text_ids = self._encode_prompt_fn(
-                    prompt=prompt, prompt_2=prompt, device=self.device,
-                )
-                result = (prompt_embeds, pooled_prompt_embeds, text_ids)
+            with torch.no_grad():
+                if self.kind == "sd3":
+                    result = self._encode_prompt_fn(
+                        prompt=prompt, prompt_2=prompt, prompt_3=prompt,
+                        negative_prompt=negative_prompt, negative_prompt_2=negative_prompt,
+                        negative_prompt_3=negative_prompt,
+                        do_classifier_free_guidance=do_classifier_free_guidance,
+                        device=self.device,
+                    )
+                else:  # flux
+                    prompt_embeds, pooled_prompt_embeds, text_ids = self._encode_prompt_fn(
+                        prompt=prompt, prompt_2=prompt, device=self.device,
+                    )
+                    result = (prompt_embeds, pooled_prompt_embeds, text_ids)
         finally:
             if self.offload_t5 and self._t5_encoder is not None:
                 self._t5_encoder.to("cpu")
@@ -429,24 +430,30 @@ class OpenMMDiTPipeline:
         timesteps = self.scheduler.timesteps
         sigmas = self.scheduler.sigmas.to(self.device)
 
-        for i, t in enumerate(timesteps):
-            sigma, sigma_next = sigmas[i], sigmas[i + 1]
-            latent_model_input = torch.cat([latents] * 2) if do_cfg else latents
-            timestep = t.expand(latent_model_input.shape[0])
+        # CRITICAL: no_grad wraps the whole denoising loop. Without it,
+        # every transformer forward pass retains its full activation graph
+        # for a backward pass that never happens -- on a multi-block
+        # transformer run repeatedly, this is the single biggest cause of
+        # VRAM usage far exceeding the on-disk model size.
+        with torch.no_grad():
+            for i, t in enumerate(timesteps):
+                sigma, sigma_next = sigmas[i], sigmas[i + 1]
+                latent_model_input = torch.cat([latents] * 2) if do_cfg else latents
+                timestep = t.expand(latent_model_input.shape[0])
 
-            v_pred = self.transformer(
-                hidden_states=latent_model_input, timestep=timestep,
-                encoder_hidden_states=prompt_embeds, pooled_projections=pooled_embeds,
-                return_dict=False,
-            )[0]
+                v_pred = self.transformer(
+                    hidden_states=latent_model_input, timestep=timestep,
+                    encoder_hidden_states=prompt_embeds, pooled_projections=pooled_embeds,
+                    return_dict=False,
+                )[0]
 
-            if do_cfg:
-                v_uncond, v_cond = v_pred.chunk(2)
-                v_pred = v_uncond + guidance_scale * (v_cond - v_uncond)
+                if do_cfg:
+                    v_uncond, v_cond = v_pred.chunk(2)
+                    v_pred = v_uncond + guidance_scale * (v_cond - v_uncond)
 
-            latents = step_fn(latents, v_pred, sigma, sigma_next, t, i)
-            if step_callback is not None:
-                latents = step_callback(i, t, latents, v_pred, num_inference_steps)
+                latents = step_fn(latents, v_pred, sigma, sigma_next, t, i)
+                if step_callback is not None:
+                    latents = step_callback(i, t, latents, v_pred, num_inference_steps)
 
         if return_latents:
             return latents
@@ -491,24 +498,27 @@ class OpenMMDiTPipeline:
         else:
             guidance = None
 
-        for i, t in enumerate(timesteps):
-            sigma, sigma_next = sigmas[i], sigmas[i + 1]
-            timestep = t.expand(latents.shape[0]).to(latents.dtype)
+        # CRITICAL: same no_grad wrapping as the SD3 loop -- see comment
+        # there for why this matters so much for VRAM.
+        with torch.no_grad():
+            for i, t in enumerate(timesteps):
+                sigma, sigma_next = sigmas[i], sigmas[i + 1]
+                timestep = t.expand(latents.shape[0]).to(latents.dtype)
 
-            v_pred = self.transformer(
-                hidden_states=latents,
-                timestep=timestep / 1000,  # FLUX expects timestep in [0,1]
-                guidance=guidance,
-                pooled_projections=pooled_embeds,
-                encoder_hidden_states=prompt_embeds,
-                txt_ids=text_ids,
-                img_ids=latent_image_ids,
-                return_dict=False,
-            )[0]
+                v_pred = self.transformer(
+                    hidden_states=latents,
+                    timestep=timestep / 1000,  # FLUX expects timestep in [0,1]
+                    guidance=guidance,
+                    pooled_projections=pooled_embeds,
+                    encoder_hidden_states=prompt_embeds,
+                    txt_ids=text_ids,
+                    img_ids=latent_image_ids,
+                    return_dict=False,
+                )[0]
 
-            latents = step_fn(latents, v_pred, sigma, sigma_next, t, i)
-            if step_callback is not None:
-                latents = step_callback(i, t, latents, v_pred, num_inference_steps)
+                latents = step_fn(latents, v_pred, sigma, sigma_next, t, i)
+                if step_callback is not None:
+                    latents = step_callback(i, t, latents, v_pred, num_inference_steps)
 
         if return_latents:
             return latents
