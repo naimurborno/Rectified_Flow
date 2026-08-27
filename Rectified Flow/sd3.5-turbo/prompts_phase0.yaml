@@ -1,0 +1,71 @@
+# Phase 0 prompt suite — 40 prompts drawn from prompts_imagenet.yaml
+#
+# Generation: 40 prompts x 64 seeds (0-63) x 3 configs = 7,680 images @ 1024^2
+#   Config A: SD3.5-Large        28 steps  CFG 4.5
+#   Config B: SD3.5-Large         4 steps  CFG 4.5
+#   Config C: SD3.5-Large-Turbo   4 steps  CFG 1.0
+# Generate Config A alone first (2,560 images), then run Gate A before B and C.
+#
+# Split:  items  1-28  = variable-color  (real-world color genuinely varies)
+#         items 29-40  = canonical-color (negative control; color is fixed)
+# Gate A: median Color-RKE over 1-28 must be clearly above median over 29-40.
+#
+# Trailing comment on each line = CLIPSeg noun for masking / source line in
+# prompts_imagenet.yaml. Scene context stripped from the source phrasing on
+# purpose: it injects background color and suppresses palette spread.
+
+  # ---- variable-color: vehicles (1-5) ----
+  - "a photo of a convertible sports car"   # car        <- 512
+  - "a photo of a pickup truck"             # truck      <- 718
+  - "a photo of a minivan"                  # minivan    <- 659
+  - "a photo of a mountain bicycle"         # bicycle    <- 674
+  - "a photo of a moped scooter"            # scooter    <- 668
+
+  # ---- variable-color: apparel (6-12) ----
+  - "a photo of a formal evening gown"      # gown       <- 580
+  - "a photo of a sports jersey"            # jersey     <- 612
+  - "a photo of a sweatshirt hoodie"        # sweatshirt <- 841
+  - "a photo of a kimono"                   # kimono     <- 616
+  - "a photo of a running shoe"             # shoe       <- 771
+  - "a photo of a necktie"                  # necktie    <- 906
+  - "a photo of a pair of socks"            # socks      <- 807
+
+  # ---- variable-color: bags and accessories (13-15) ----
+  - "a photo of a backpack"                 # backpack   <- 415
+  - "a photo of a handbag"                  # handbag    <- 749
+  - "a photo of an umbrella"                # umbrella   <- 879
+
+  # ---- variable-color: furniture and home (16-20) ----
+  - "a photo of a sofa"                     # sofa       <- 832
+  - "a photo of a folding chair"            # chair      <- 560
+  - "a photo of a table lamp"               # lamp       <- 846
+  - "a photo of a bed pillow"               # pillow     <- 722
+  - "a photo of a shower curtain"           # curtain    <- 795
+
+  # ---- variable-color: containers and kitchen (21-24) ----
+  - "a photo of a coffee mug"               # mug        <- 505
+  - "a photo of a teapot"                   # teapot     <- 849
+  - "a photo of a water bottle"             # bottle     <- 898
+  - "a photo of a flower vase"              # vase       <- 883
+
+  # ---- variable-color: textiles and misc (25-28) ----
+  - "a photo of a bath towel"               # towel      <- 435
+  - "a photo of a ball of wool yarn"        # yarn       <- 911
+  - "a photo of a winter mitten"            # mitten     <- 661
+  - "a photo of a tricycle"                 # tricycle   <- 870
+
+  # ---- canonical-color: animals (29-35) ----
+  - "a photo of a zebra"                    # zebra      <- 341
+  - "a photo of a giant panda"              # panda      <- 389
+  - "a photo of a Dalmatian dog"            # dog        <- 252
+  - "a photo of a tiger"                    # tiger      <- 293
+  - "a photo of a ladybug"                  # ladybug    <- 302
+  - "a photo of a monarch butterfly"        # butterfly  <- 324
+  - "a photo of a clownfish"                # fish       <- 394
+
+  # ---- canonical-color: produce (36-40) ----
+  - "a photo of a lemon"                    # lemon      <- 950
+  - "a photo of a bunch of bananas"         # bananas    <- 953
+  - "a photo of a strawberry"               # strawberry <- 948
+  - "a photo of broccoli"                   # broccoli   <- 936
+  - "a photo of a pineapple"                # pineapple  <- 952
