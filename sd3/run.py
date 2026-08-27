@@ -72,6 +72,11 @@ def main():
     for local_idx, prompt in enumerate(prompts):
         global_idx = offset + local_idx
         slug = slugify(prompt)
+
+        # One folder per prompt, e.g. outputs/original/000_a_pan_filled_with_veggies/
+        prompt_dir = out_dir / f"{global_idx:03d}_{slug}"
+        prompt_dir.mkdir(parents=True, exist_ok=True)
+
         for seed in seeds:
             print(f"[run] prompt {local_idx+1}/{len(prompts)} "
                   f"(global #{global_idx}) | seed {seed} | {prompt}")
@@ -80,8 +85,8 @@ def main():
                 negative_prompt=negative_prompt,
                 seed=seed,
             )
-            filename = f"{global_idx:03d}_{slug}_seed{seed}.png"
-            image.save(out_dir / filename)
+            filename = f"seed{seed}.png"
+            image.save(prompt_dir / filename)
 
     print(f"[run] Done. Images saved to: {out_dir}")
 
