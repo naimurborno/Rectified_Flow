@@ -209,7 +209,7 @@ class SD3PipelineWrapper:
         gen_cfg   = self.cfg.get("generation", {})
         generator = torch.Generator(device=self.device).manual_seed(seed)
 
-        print("[Pipeline] Running standard generation path.")
+        # print("[Pipeline] Running standard generation path.")
         result = self.pipe(
             prompt              = prompt,
             negative_prompt     = negative_prompt,
