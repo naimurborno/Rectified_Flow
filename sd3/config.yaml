@@ -1,6 +1,6 @@
 # ── Active model ────────────────────────────────────────────────────
 model_name: "sd3"
-model_id:   "stabilityai/stable-diffusion-3-medium-diffusers"
+model_id:   "stabilityai/stable-diffusion-3.5-medium"
 
 # ── Device & seed ────────────────────────────────────────────────────
 device: "cuda"
