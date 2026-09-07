@@ -1,0 +1,9 @@
+python = 3.10.18
+torch = 2.5.1+cu121
+torch CUDA = 12.1
+CUDA available = False
+diffusers = 0.40.0
+transformers = 5.16.1
+accelerate = 1.14.0
+GPU = UNAVAILABLE
+

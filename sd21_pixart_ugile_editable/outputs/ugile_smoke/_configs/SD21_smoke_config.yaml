@@ -1,0 +1,35 @@
+model_name: sd21_ugile
+model_id: sd2-community/stable-diffusion-2-1-base
+device: cuda
+seed: 46
+seeds:
+- 46
+prompts_file: /data1/sakib/DIVERSE/files-main/outputs/ugile_smoke/one_prompt.yaml
+negative_prompt: ''
+output: sd21_smoke.png
+generation:
+  height: 512
+  width: 512
+flow:
+  num_steps: 50
+  guidance_scale: 7.5
+ugile:
+  enabled: true
+  method: threshold
+  num_grad_steps: 50
+  sigma_lo: 0.3
+  sigma_hi: 0.9
+  escape_scale: 1.0
+  theta_max: 0.35
+  walk_steps: 10
+  branch_noise: 0.7
+  J: 1
+  noise_scale: 2.0
+  gamma: 1.2
+  diverse_output_dir: /data1/sakib/DIVERSE/files-main/outputs/ugile_smoke/SD21/ugile
+  original_output_dir: /data1/sakib/DIVERSE/files-main/outputs/ugile_smoke/SD21/base
+  save_original: true
+prompts:
+- a red apple on a wooden table
+prompt_offset: 0
+pair_manifest: /data1/sakib/DIVERSE/files-main/outputs/ugile_smoke/pair_manifest.jsonl

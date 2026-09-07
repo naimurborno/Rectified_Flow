@@ -1,0 +1,37 @@
+model_name: "sd21_ugile"
+model_id:   "sd2-community/stable-diffusion-2-1-base"
+
+device: "cuda"
+seed:   41
+seeds: [41, 42, 43, 44, 45]
+
+prompts_file: "prompts_mscoco.yaml"
+
+negative_prompt: ""
+
+output: "prompt_sd21.png"
+
+generation:
+  height: 512
+  width:  512
+
+flow:
+  num_steps:      50
+  guidance_scale: 7.5
+
+ugile:
+  enabled: true
+  method: "threshold"
+  num_grad_steps: 50
+  sigma_lo: 0.3
+  sigma_hi: 0.9
+  escape_scale: 1.0
+  theta_max: 0.35
+  walk_steps: 10
+  branch_noise: 0.7
+  J: 1
+  noise_scale: 2.0
+  gamma: 1.2
+  diverse_output_dir:  "outputs/SD21/ugile"
+  original_output_dir: "outputs/SD21/base"
+  save_original: true
