@@ -5,7 +5,7 @@ device: "cuda"
 seed:   41
 seeds: [41, 42, 43, 44, 45]
 
-prompts_file: "prompts_mscoco.yaml"
+prompts_file: "/kaggle/working/Rectified_Flow/sd21_pixart_ugile_editable/sd2.1/prompts_mscoco.yaml"
 
 negative_prompt: ""
 
