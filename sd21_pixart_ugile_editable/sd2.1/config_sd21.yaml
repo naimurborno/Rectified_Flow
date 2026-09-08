@@ -16,7 +16,7 @@ generation:
   width:  512
 
 flow:
-  num_steps:      50
+  num_steps:      28
   guidance_scale: 7.5
 
 ugile:
@@ -26,7 +26,7 @@ ugile:
   sigma_lo: 0.3
   sigma_hi: 0.9
   escape_scale: 1.0
-  theta_max: 0.15
+  theta_max: 0.10
   walk_steps: 10
   branch_noise: 0.7
   J: 1
