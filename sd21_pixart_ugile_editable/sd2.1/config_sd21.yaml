@@ -26,7 +26,7 @@ ugile:
   sigma_lo: 0.3
   sigma_hi: 0.9
   escape_scale: 1.0
-  theta_max: 0.35
+  theta_max: 0.25
   walk_steps: 10
   branch_noise: 0.7
   J: 1
